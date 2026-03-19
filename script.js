@@ -2,74 +2,161 @@ const buttons = document.querySelectorAll('.time-btn');
 const selectedLabel = document.getElementById('selectedLabel');
 const countdown = document.getElementById('countdown');
 const topSand = document.getElementById('topSand');
-const bottomSand = document.getElementById('bottomSand');
+const topSandGlow = document.getElementById('topSandGlow');
+const bottomBase = document.getElementById('bottomBase');
+const bottomPile = document.getElementById('bottomPile');
+const bottomGlow = document.getElementById('bottomGlow');
 const sandStream = document.getElementById('sandStream');
+const streamSpark = document.getElementById('streamSpark');
 
-let timerId = null;
+let animationId = null;
 let endTime = 0;
 let totalMs = 0;
 
-const TOP_Y = 60;
-const BOTTOM_Y = 360;
-const TOP_LEFT = 52;
-const TOP_RIGHT = 208;
-const NECK_LEFT = 122;
-const NECK_RIGHT = 138;
-const BOTTOM_CENTER_X = 130;
-const BOTTOM_MAX_HALF = 78;
-const BOTTOM_APEX_Y = 234;
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeInOut = (t) => t * t * (3 - 2 * t);
 
 function formatTime(ms) {
   const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-function setTopSand(progress) {
-  const p = Math.min(1, Math.max(0, progress));
-  const currentY = TOP_Y + (BOTTOM_APEX_Y - TOP_Y) * p;
-  const points = [
-    `${TOP_LEFT},${TOP_Y}`,
-    `${TOP_RIGHT},${TOP_Y}`,
-    `${NECK_RIGHT},${currentY}`,
-    `${NECK_LEFT},${currentY}`
-  ].join(" ");
-  topSand.setAttribute("points", points);
+function buildTopSandPath(progress) {
+  const p = clamp(progress);
+  const level = easeInOut(p);
+  const surfaceY = lerp(72, 178, level);
+  const inset = lerp(10, 67, level);
+  const leftX = 52 + inset;
+  const rightX = 208 - inset;
+  const dip = lerp(3, 10, 1 - level);
+  const neckInset = lerp(10, 2, level);
+  const neckLeftX = 122 + neckInset;
+  const neckRightX = 138 - neckInset;
+  const bottomY = 186;
+
+  return [
+    `M ${leftX} ${surfaceY}`,
+    `Q 130 ${surfaceY - dip} ${rightX} ${surfaceY}`,
+    `L ${neckRightX} ${bottomY}`,
+    `L ${neckLeftX} ${bottomY}`,
+    'Z'
+  ].join(' ');
 }
 
-function setBottomSand(progress) {
-  const p = Math.min(1, Math.max(0, progress));
-  const halfWidth = BOTTOM_MAX_HALF * p;
-  const topY = BOTTOM_Y - (BOTTOM_Y - BOTTOM_APEX_Y) * p;
-  const leftX = BOTTOM_CENTER_X - halfWidth;
-  const rightX = BOTTOM_CENTER_X + halfWidth;
-  const points = [
-    `${leftX},${BOTTOM_Y}`,
-    `${rightX},${BOTTOM_Y}`,
-    `${BOTTOM_CENTER_X},${topY}`
-  ].join(" ");
-  bottomSand.setAttribute("points", points);
+function buildBottomBasePath(progress) {
+  const p = clamp(progress);
+  const level = easeInOut(p);
+  const fillHeight = lerp(0, 118, level);
+  const y = 360 - fillHeight;
+  const leftX = lerp(128, 70, level);
+  const rightX = 260 - leftX;
+  const curveLift = lerp(0, 16, level);
+
+  return [
+    `M 52 360`,
+    `L 208 360`,
+    `L ${rightX} ${y}`,
+    `Q 130 ${y - curveLift} ${leftX} ${y}`,
+    'Z'
+  ].join(' ');
 }
 
-function setProgress(progress) {
-  const p = Math.min(1, Math.max(0, progress));
-  setTopSand(p);
-  setBottomSand(p);
-  sandStream.setAttribute("opacity", p >= 1 ? "0" : "1");
+function buildBottomPilePath(progress, timeMs) {
+  const p = clamp(progress);
+  if (p <= 0.001) {
+    return 'M 130 360 L 130 360 L 130 360 Z';
+  }
+
+  const level = easeInOut(p);
+  const pileHeight = lerp(0, 124, level);
+  const halfWidth = lerp(0, 68, level);
+  const apexY = 360 - pileHeight;
+  const wave = Math.sin(timeMs / 180) * Math.max(0.8, 3.2 * (1 - p));
+  const leftBaseX = 130 - halfWidth;
+  const rightBaseX = 130 + halfWidth;
+
+  return [
+    `M ${leftBaseX} 360`,
+    `Q ${108 - wave} ${360 - pileHeight * 0.34} 130 ${apexY}`,
+    `Q ${152 + wave} ${360 - pileHeight * 0.34} ${rightBaseX} 360`,
+    'Z'
+  ].join(' ');
+}
+
+function updateScene(progress, timeMs = performance.now()) {
+  const p = clamp(progress);
+  topSand.setAttribute('d', buildTopSandPath(p));
+  bottomBase.setAttribute('d', buildBottomBasePath(p));
+  bottomPile.setAttribute('d', buildBottomPilePath(p, timeMs));
+
+  const topGlowY = lerp(88, 170, easeInOut(p));
+  const topGlowOpacity = lerp(0.34, 0.12, p);
+  topSandGlow.setAttribute('cy', String(topGlowY));
+  topSandGlow.setAttribute('opacity', String(topGlowOpacity));
+
+  const bottomGlowY = lerp(352, 318, easeInOut(p));
+  const bottomGlowRx = lerp(12, 48, easeInOut(p));
+  bottomGlow.setAttribute('cy', String(bottomGlowY));
+  bottomGlow.setAttribute('rx', String(bottomGlowRx));
+  bottomGlow.setAttribute('opacity', String(lerp(0.08, 0.24, p)));
+
+  if (p >= 1) {
+    sandStream.setAttribute('opacity', '0');
+    streamSpark.setAttribute('opacity', '0');
+    sandStream.setAttribute('height', '54');
+    sandStream.setAttribute('y', '184');
+    return;
+  }
+
+  const pulse = (Math.sin(timeMs / 70) + 1) * 0.5;
+  const width = lerp(4.2, 6.4, pulse);
+  const x = 130 - width / 2;
+  const streamHeight = lerp(52, 58, pulse);
+  const y = 184 + lerp(0, 3, pulse);
+
+  sandStream.setAttribute('x', x.toFixed(2));
+  sandStream.setAttribute('width', width.toFixed(2));
+  sandStream.setAttribute('height', streamHeight.toFixed(2));
+  sandStream.setAttribute('y', y.toFixed(2));
+  sandStream.setAttribute('rx', (width / 2).toFixed(2));
+  sandStream.setAttribute('opacity', '1');
+
+  streamSpark.setAttribute('cy', String(210 + Math.sin(timeMs / 100) * 2));
+  streamSpark.setAttribute('opacity', String(0.1 + pulse * 0.12));
 }
 
 function stopTimer(finished = false) {
-  if (timerId) {
-    clearInterval(timerId);
-    timerId = null;
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
   }
-  sandStream.setAttribute("opacity", "0");
 
   if (finished) {
-    setProgress(1);
-    countdown.textContent = "00:00";
+    updateScene(1);
+    countdown.textContent = '00:00';
+    return;
   }
+
+  sandStream.setAttribute('opacity', '0');
+  streamSpark.setAttribute('opacity', '0');
+}
+
+function animate() {
+  const remaining = endTime - Date.now();
+  const progress = 1 - remaining / totalMs;
+
+  updateScene(progress);
+  countdown.textContent = formatTime(remaining);
+
+  if (remaining <= 0) {
+    stopTimer(true);
+    return;
+  }
+
+  animationId = requestAnimationFrame(animate);
 }
 
 function startTimer(minutes, button) {
@@ -78,33 +165,21 @@ function startTimer(minutes, button) {
   totalMs = minutes * 60 * 1000;
   endTime = Date.now() + totalMs;
 
-  buttons.forEach((btn) => btn.classList.remove("active"));
-  button.classList.add("active");
+  buttons.forEach((btn) => btn.classList.remove('active'));
+  button.classList.add('active');
 
   selectedLabel.textContent = `${minutes}분`;
   countdown.textContent = formatTime(totalMs);
-  setProgress(0);
-  sandStream.setAttribute("opacity", "1");
-
-  timerId = setInterval(() => {
-    const remaining = endTime - Date.now();
-    const progress = 1 - remaining / totalMs;
-
-    setProgress(progress);
-    countdown.textContent = formatTime(remaining);
-
-    if (remaining <= 0) {
-      stopTimer(true);
-    }
-  }, 100);
+  updateScene(0);
+  animationId = requestAnimationFrame(animate);
 }
 
 buttons.forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener('click', () => {
     const minutes = Number(button.dataset.minutes);
     startTimer(minutes, button);
   });
 });
 
-setProgress(0);
-countdown.textContent = "00:00";
+updateScene(0);
+countdown.textContent = '00:00';

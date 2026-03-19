@@ -5,12 +5,7 @@
 :root {
   --bg-1: #050914;
   --bg-2: #091224;
-  --panel: rgba(18, 26, 46, 0.72);
-  --panel-border: rgba(255, 255, 255, 0.08);
   --text: #eef3ff;
-  --muted: #b3bfd8;
-  --gold: #ddb66a;
-  --gold-2: #a87932;
 }
 
 html, body {
@@ -129,32 +124,38 @@ body {
   filter: drop-shadow(0 28px 60px rgba(0, 0, 0, 0.42));
 }
 
-.hourglass-svg defs + g,
 .hourglass-svg .frame rect {
   vector-effect: non-scaling-stroke;
 }
 
 .glass-outline {
-  fill: rgba(179, 223, 255, 0.07);
-  stroke: rgba(214, 234, 255, 0.82);
+  fill: rgba(179, 223, 255, 0.06);
+  stroke: rgba(220, 236, 255, 0.84);
   stroke-width: 3;
 }
 
 .neck {
   fill: rgba(179, 223, 255, 0.08);
-  stroke: rgba(214, 234, 255, 0.82);
+  stroke: rgba(220, 236, 255, 0.84);
   stroke-width: 3;
 }
 
 .glass-shine {
   fill: none;
-  stroke: rgba(255,255,255,0.38);
+  stroke: rgba(255,255,255,0.34);
   stroke-width: 4;
   stroke-linecap: round;
 }
 
+#topSand,
+#bottomBase,
+#bottomPile,
 #sandStream {
-  filter: drop-shadow(0 0 10px rgba(241,214,154,0.30));
+  filter: drop-shadow(0 0 12px rgba(241,214,154,0.12));
+}
+
+#streamGroup {
+  mix-blend-mode: screen;
 }
 
 @media (max-width: 820px) {

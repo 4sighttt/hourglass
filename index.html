@@ -34,14 +34,20 @@
       <div class="hourglass-wrap">
         <svg class="hourglass-svg" viewBox="0 0 260 420" aria-hidden="true">
           <defs>
-            <linearGradient id="glassFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>
-              <stop offset="100%" stop-color="rgba(255,255,255,0.06)"/>
+            <linearGradient id="sandFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f3d99b"/>
+              <stop offset="55%" stop-color="#e0b660"/>
+              <stop offset="100%" stop-color="#cb8f37"/>
             </linearGradient>
 
-            <linearGradient id="sandFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#f1d69a"/>
-              <stop offset="100%" stop-color="#d8a44b"/>
+            <radialGradient id="sandGlow" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stop-color="rgba(255,235,184,0.5)"/>
+              <stop offset="100%" stop-color="rgba(255,235,184,0)"/>
+            </radialGradient>
+
+            <linearGradient id="streamFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f8e3aa"/>
+              <stop offset="100%" stop-color="#e0aa4b"/>
             </linearGradient>
 
             <clipPath id="topClip">
@@ -54,10 +60,10 @@
           </defs>
 
           <g class="frame">
-            <rect x="34" y="18" width="192" height="18" rx="9" fill="#6b4c29"></rect>
-            <rect x="34" y="384" width="192" height="18" rx="9" fill="#4e361d"></rect>
-            <rect x="48" y="28" width="10" height="364" rx="5" fill="#755633"></rect>
-            <rect x="202" y="28" width="10" height="364" rx="5" fill="#5b3f22"></rect>
+            <rect x="34" y="18" width="192" height="18" rx="9" fill="#7b562a"></rect>
+            <rect x="34" y="384" width="192" height="18" rx="9" fill="#5b3d1b"></rect>
+            <rect x="48" y="28" width="10" height="364" rx="5" fill="#866034"></rect>
+            <rect x="202" y="28" width="10" height="364" rx="5" fill="#664421"></rect>
           </g>
 
           <g class="glass">
@@ -69,14 +75,20 @@
           </g>
 
           <g clip-path="url(#topClip)">
-            <polygon id="topSand" fill="url(#sandFill)" points="52,60 208,60 138,186 122,186"></polygon>
+            <path id="topSand" fill="url(#sandFill)"></path>
+            <ellipse id="topSandGlow" cx="130" cy="88" rx="66" ry="26" fill="url(#sandGlow)" opacity="0.35"></ellipse>
+          </g>
+
+          <g id="streamGroup">
+            <rect id="sandStream" x="127" y="184" width="6" height="54" rx="3" fill="url(#streamFill)" opacity="0"></rect>
+            <ellipse id="streamSpark" cx="130" cy="210" rx="8" ry="20" fill="rgba(255,228,168,0.22)" opacity="0"></ellipse>
           </g>
 
           <g clip-path="url(#bottomClip)">
-            <polygon id="bottomSand" fill="url(#sandFill)" points="130,360 130,360 130,360"></polygon>
+            <path id="bottomBase" fill="url(#sandFill)"></path>
+            <path id="bottomPile" fill="url(#sandFill)"></path>
+            <ellipse id="bottomGlow" cx="130" cy="334" rx="42" ry="18" fill="url(#sandGlow)" opacity="0.22"></ellipse>
           </g>
-
-          <rect id="sandStream" x="127" y="184" width="6" height="54" rx="3" fill="url(#sandFill)" opacity="0"></rect>
         </svg>
       </div>
     </section>
