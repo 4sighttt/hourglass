@@ -3,33 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hourglass</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Hourglass Timer</title>
+  <link rel="stylesheet" href="style_v2.css" />
 </head>
 <body>
-  <main class="scene">
-    <div class="title-wrap">
-      <h1>Hourglass</h1>
-      <p>HTML + CSS animated hourglass</p>
-    </div>
+  <main class="app">
+    <h1 class="title">Hourglass Timer</h1>
 
-    <section class="hourglass-wrap" aria-label="애니메이션 모래시계">
-      <div class="hourglass">
-        <div class="frame top"></div>
-        <div class="frame bottom"></div>
+    <section class="timer-panel" aria-label="타이머 선택">
+      <div class="button-grid">
+        <button class="time-btn" data-minutes="1">1분</button>
+        <button class="time-btn" data-minutes="3">3분</button>
+        <button class="time-btn" data-minutes="5">5분</button>
+        <button class="time-btn" data-minutes="10">10분</button>
+        <button class="time-btn" data-minutes="15">15분</button>
+        <button class="time-btn" data-minutes="30">30분</button>
+      </div>
 
-        <div class="glass top-glass">
-          <div class="sand sand-top"></div>
-        </div>
-
-        <div class="glass bottom-glass">
-          <div class="sand sand-bottom"></div>
-        </div>
-
-        <div class="neck"></div>
-        <div class="stream"></div>
+      <div class="status-wrap">
+        <div class="selected-time">선택: <span id="selectedLabel">없음</span></div>
+        <div class="countdown" id="countdown">00:00</div>
       </div>
     </section>
+
+    <section class="scene">
+      <div class="hourglass-frame">
+        <div class="hourglass" id="hourglass">
+          <div class="bulb bulb-top">
+            <div class="sand sand-top" id="sandTop"></div>
+          </div>
+
+          <div class="neck">
+            <div class="stream" id="stream"></div>
+          </div>
+
+          <div class="bulb bulb-bottom">
+            <div class="sand sand-bottom" id="sandBottom"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="hint">버튼을 누르면 시작되고, 시간이 끝나면 모래시계는 그대로 멈춥니다.</p>
   </main>
+
+  <script src="script_v2.js"></script>
 </body>
 </html>
