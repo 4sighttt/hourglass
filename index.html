@@ -8,9 +8,9 @@
 </head>
 <body>
   <main class="app">
-    <section class="hud" aria-label="타이머 상태">
+    <section class="controls" aria-label="타이머 선택">
       <div class="button-grid">
-        <button class="time-btn" data-minutes="1">1분</button>
+        <button class="time-btn active" data-minutes="1">1분</button>
         <button class="time-btn" data-minutes="3">3분</button>
         <button class="time-btn" data-minutes="5">5분</button>
         <button class="time-btn" data-minutes="10">10분</button>
@@ -19,55 +19,65 @@
       </div>
 
       <div class="status">
-        <div class="status-line">선택된 시간 <strong id="selectedLabel">없음</strong></div>
-        <div class="status-line">남은 시간 <strong id="countdown">00:00</strong></div>
+        <div class="status-line">선택된 시간 <strong id="selectedLabel">1분</strong></div>
+        <div class="status-line">남은 시간 <strong id="countdown">01:00</strong></div>
       </div>
     </section>
 
     <section class="viewer" aria-label="모래시계 영역">
       <div class="hourglass-wrap">
-        <svg class="hourglass-svg" viewBox="0 0 300 430" aria-hidden="true">
+        <svg class="hourglass-svg" viewBox="0 0 340 440" aria-hidden="true">
           <defs>
-            <linearGradient id="sandFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#efd38b"/>
-              <stop offset="100%" stop-color="#d8a44b"/>
-            </linearGradient>
             <linearGradient id="glassTint" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="rgba(220,240,255,0.08)"/>
-              <stop offset="100%" stop-color="rgba(220,240,255,0.03)"/>
+              <stop offset="0%" stop-color="rgba(199,220,255,0.12)"/>
+              <stop offset="100%" stop-color="rgba(199,220,255,0.04)"/>
             </linearGradient>
+
+            <linearGradient id="sandFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#efd58f"/>
+              <stop offset="100%" stop-color="#d9a74d"/>
+            </linearGradient>
+
+            <radialGradient id="sandGlow" cx="50%" cy="20%" r="80%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.16)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+            </radialGradient>
+
             <clipPath id="topClip">
-              <path d="M74 74 L226 74 Q216 122 177 175 L123 175 Q84 122 74 74 Z"></path>
+              <path d="M84 74 L256 74 C242 128 207 169 178 208 L162 208 C133 169 98 128 84 74 Z"></path>
             </clipPath>
+
             <clipPath id="bottomClip">
-              <path d="M123 255 L177 255 Q216 308 226 356 L74 356 Q84 308 123 255 Z"></path>
+              <path d="M162 254 L178 254 C207 293 242 334 256 388 L84 388 C98 334 133 293 162 254 Z"></path>
             </clipPath>
           </defs>
 
           <g class="frame">
-            <rect x="52" y="24" width="196" height="20" rx="10"></rect>
-            <rect x="52" y="386" width="196" height="20" rx="10"></rect>
-            <rect x="66" y="34" width="12" height="362" rx="6"></rect>
-            <rect x="222" y="34" width="12" height="362" rx="6"></rect>
+            <rect x="52" y="30" width="236" height="22" rx="11" fill="#9c6f33"></rect>
+            <rect x="52" y="388" width="236" height="22" rx="11" fill="#7f5726"></rect>
+            <rect x="72" y="42" width="14" height="356" rx="7" fill="#8e6330"></rect>
+            <rect x="254" y="42" width="14" height="356" rx="7" fill="#845c2b"></rect>
           </g>
 
-          <g class="glass-body">
-            <path class="glass-outline" d="M74 74 L226 74 Q216 122 177 175 L123 175 Q84 122 74 74 Z"></path>
-            <path class="glass-outline" d="M123 255 L177 255 Q216 308 226 356 L74 356 Q84 308 123 255 Z"></path>
-            <rect class="neck" x="132" y="175" width="36" height="80" rx="14"></rect>
-            <path class="glass-shine" d="M102 92 C96 118 104 143 122 168"></path>
-            <path class="glass-shine" d="M190 286 C198 308 193 332 178 345"></path>
+          <g class="glass">
+            <path class="glass-outline" d="M84 74 L256 74 C242 128 207 169 178 208 L162 208 C133 169 98 128 84 74 Z"></path>
+            <path class="glass-outline" d="M162 254 L178 254 C207 293 242 334 256 388 L84 388 C98 334 133 293 162 254 Z"></path>
+            <rect class="neck" x="152" y="208" width="36" height="46" rx="16"></rect>
+            <path class="glass-shine" d="M118 98 C111 132 124 168 144 190"></path>
+            <path class="glass-shine" d="M222 292 C229 322 219 355 204 376"></path>
           </g>
 
           <g clip-path="url(#topClip)">
             <path id="topSand" fill="url(#sandFill)"></path>
+            <path id="topSandHighlight" fill="url(#sandGlow)" opacity="0.55"></path>
           </g>
 
           <g clip-path="url(#bottomClip)">
             <path id="bottomSand" fill="url(#sandFill)"></path>
+            <path id="bottomSandHighlight" fill="url(#sandGlow)" opacity="0.38"></path>
           </g>
 
-          <path id="sandStream" fill="url(#sandFill)"></path>
+          <rect id="sandStream" x="166" y="206" width="8" height="56" rx="4" fill="url(#sandFill)" opacity="1"></rect>
         </svg>
       </div>
     </section>
