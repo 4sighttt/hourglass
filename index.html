@@ -32,15 +32,11 @@
               <stop offset="0%" stop-color="#efd38b"/>
               <stop offset="100%" stop-color="#d8a44b"/>
             </linearGradient>
-            <linearGradient id="glassTint" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="rgba(220,240,255,0.08)"/>
-              <stop offset="100%" stop-color="rgba(220,240,255,0.03)"/>
-            </linearGradient>
             <clipPath id="topClip">
-              <path d="M74 74 L226 74 Q216 122 177 175 L123 175 Q84 122 74 74 Z"></path>
+              <path d="M80 74 L220 74 Q212 116 176 173 L124 173 Q88 116 80 74 Z"></path>
             </clipPath>
             <clipPath id="bottomClip">
-              <path d="M123 255 L177 255 Q216 308 226 356 L74 356 Q84 308 123 255 Z"></path>
+              <path d="M124 257 L176 257 Q212 314 220 356 L80 356 Q88 314 124 257 Z"></path>
             </clipPath>
           </defs>
 
@@ -52,22 +48,22 @@
           </g>
 
           <g class="glass-body">
-            <path class="glass-outline" d="M74 74 L226 74 Q216 122 177 175 L123 175 Q84 122 74 74 Z"></path>
-            <path class="glass-outline" d="M123 255 L177 255 Q216 308 226 356 L74 356 Q84 308 123 255 Z"></path>
-            <rect class="neck" x="132" y="175" width="36" height="80" rx="14"></rect>
-            <path class="glass-shine" d="M102 92 C96 118 104 143 122 168"></path>
-            <path class="glass-shine" d="M190 286 C198 308 193 332 178 345"></path>
+            <path class="glass-outline" d="M80 74 L220 74 Q212 116 176 173 L124 173 Q88 116 80 74 Z"></path>
+            <path class="glass-outline" d="M124 257 L176 257 Q212 314 220 356 L80 356 Q88 314 124 257 Z"></path>
+            <rect class="neck" x="132" y="173" width="36" height="84" rx="14"></rect>
+            <path class="glass-shine" d="M102 92 C95 120 103 146 122 168"></path>
+            <path class="glass-shine" d="M193 289 C201 313 195 334 180 347"></path>
           </g>
 
           <g clip-path="url(#topClip)">
-            <path id="topSand" fill="url(#sandFill)"></path>
+            <polygon id="topSand" fill="url(#sandFill)"></polygon>
           </g>
 
           <g clip-path="url(#bottomClip)">
             <path id="bottomSand" fill="url(#sandFill)"></path>
           </g>
 
-          <path id="sandStream" fill="url(#sandFill)"></path>
+          <rect id="sandStream" x="147" y="173" width="6" height="84" rx="3" fill="url(#sandFill)"></rect>
         </svg>
       </div>
     </section>

@@ -9,30 +9,20 @@ let timerId = null;
 let endTime = 0;
 let totalMs = 0;
 
-const TOP = {
-  yTop: 74,
-  yNeck: 175,
-  leftTop: 74,
-  rightTop: 226,
-  neckLeft: 123,
-  neckRight: 177,
-  centerX: 150,
-  maxHalf: 76,
-};
+const TOP_TOP_Y = 74;
+const TOP_NECK_Y = 173;
+const TOP_CENTER_X = 150;
+const TOP_MAX_HALF = 84;
+const TOP_NECK_HALF = 28;
 
-const BOTTOM = {
-  yBase: 356,
-  yNeck: 255,
-  centerX: 150,
-  maxHalf: 76,
-};
+const BOTTOM_BASE_Y = 356;
+const BOTTOM_SHOULDER_Y = 257;
+const BOTTOM_CENTER_X = 150;
+const BOTTOM_MAX_HALF = 72;
+const BOTTOM_CURVE = 22;
 
-function clamp(v, min = 0, max = 1) {
-  return Math.min(max, Math.max(min, v));
-}
-
-function easeInOut(t) {
-  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
 function formatTime(ms) {
@@ -42,121 +32,97 @@ function formatTime(ms) {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-function buildTopSandPath(progress) {
-  const p = clamp(progress);
-  const drained = easeInOut(p);
-  const y = TOP.yTop + (TOP.yNeck - TOP.yTop) * drained;
-  const half = TOP.maxHalf * (1 - drained);
-  const left = TOP.centerX - half;
-  const right = TOP.centerX + half;
-  const lip = 2 + 7 * (1 - drained);
+function setTopSand(progress) {
+  const p = clamp(progress, 0, 1);
+  const empty = p;
+  const levelY = TOP_TOP_Y + (TOP_NECK_Y - TOP_TOP_Y) * Math.pow(empty, 0.92);
+  const halfTop = TOP_MAX_HALF - (TOP_MAX_HALF - TOP_NECK_HALF) * Math.pow(empty, 0.78);
+  const overfill = 16;
 
-  return [
-    `M ${left} ${y}`,
-    `Q ${TOP.centerX} ${y - lip}, ${right} ${y}`,
-    `L ${TOP.neckRight} ${TOP.yNeck}`,
-    `L ${TOP.neckLeft} ${TOP.yNeck}`,
-    'Z'
+  const points = [
+    `${TOP_CENTER_X - halfTop - overfill},${levelY}`,
+    `${TOP_CENTER_X + halfTop + overfill},${levelY}`,
+    `${TOP_CENTER_X + TOP_NECK_HALF + overfill},${TOP_NECK_Y + 8}`,
+    `${TOP_CENTER_X - TOP_NECK_HALF - overfill},${TOP_NECK_Y + 8}`
   ].join(' ');
+
+  topSand.setAttribute('points', points);
 }
 
-function buildBottomSandPath(progress) {
-  const p = clamp(progress);
-  const filled = easeInOut(p);
-  const half = BOTTOM.maxHalf * filled;
-  const apexY = BOTTOM.yBase - (BOTTOM.yBase - BOTTOM.yNeck) * filled;
-  const left = BOTTOM.centerX - half;
-  const right = BOTTOM.centerX + half;
-  const baseBulge = 8 + 10 * filled;
+function setBottomSand(progress) {
+  const p = clamp(progress, 0, 1);
+  const height = 6 + 93 * Math.pow(p, 0.9);
+  const topY = BOTTOM_BASE_Y - height;
+  const halfTop = 4 + BOTTOM_MAX_HALF * Math.pow(p, 0.88);
+  const belly = Math.min(BOTTOM_MAX_HALF + 6, halfTop + 10 + 10 * p);
+  const controlY = BOTTOM_BASE_Y - Math.max(8, height * 0.16);
 
-  return [
-    `M ${left} ${BOTTOM.yBase}`,
-    `Q ${BOTTOM.centerX} ${BOTTOM.yBase - baseBulge}, ${right} ${BOTTOM.yBase}`,
-    `L ${BOTTOM.centerX} ${apexY}`,
+  const d = [
+    `M ${BOTTOM_CENTER_X - halfTop} ${topY}`,
+    `Q ${BOTTOM_CENTER_X - belly} ${topY + height * 0.56} ${BOTTOM_CENTER_X - BOTTOM_MAX_HALF} ${BOTTOM_BASE_Y}`,
+    `Q ${BOTTOM_CENTER_X} ${controlY} ${BOTTOM_CENTER_X + BOTTOM_MAX_HALF} ${BOTTOM_BASE_Y}`,
+    `Q ${BOTTOM_CENTER_X + belly} ${topY + height * 0.56} ${BOTTOM_CENTER_X + halfTop} ${topY}`,
+    `Q ${BOTTOM_CENTER_X} ${topY - BOTTOM_CURVE * Math.pow(p, 0.85)} ${BOTTOM_CENTER_X - halfTop} ${topY}`,
     'Z'
   ].join(' ');
+
+  bottomSand.setAttribute('d', d);
 }
 
-function buildStreamPath(progress) {
-  const p = clamp(progress);
-  if (p >= 1) return '';
-
-  const active = p > 0.01;
-  const width = active ? 5 : 0;
-  const x = 150 - width / 2;
-  const top = 174;
-  const bottom = 256;
-  const waist = 2.6;
-
-  return [
-    `M ${x} ${top}`,
-    `L ${x + width} ${top}`,
-    `Q ${150 + waist} ${(top + bottom) / 2}, ${150 + 2.2} ${bottom}`,
-    `L ${150 - 2.2} ${bottom}`,
-    `Q ${150 - waist} ${(top + bottom) / 2}, ${x} ${top}`,
-    'Z'
-  ].join(' ');
-}
-
-function render(progress) {
-  const p = clamp(progress);
-  topSand.setAttribute('d', buildTopSandPath(p));
-  bottomSand.setAttribute('d', buildBottomSandPath(p));
-  sandStream.setAttribute('d', buildStreamPath(p));
+function setProgress(progress) {
+  const p = clamp(progress, 0, 1);
+  setTopSand(p);
+  setBottomSand(p);
   sandStream.setAttribute('opacity', p >= 1 ? '0' : '1');
 }
 
 function stopTimer(finished = false) {
   if (timerId) {
-    cancelAnimationFrame(timerId);
+    clearInterval(timerId);
     timerId = null;
   }
 
+  sandStream.setAttribute('opacity', '0');
+
   if (finished) {
+    setProgress(1);
     countdown.textContent = '00:00';
-    render(1);
-  } else {
-    sandStream.setAttribute('opacity', '0');
   }
-}
-
-function tick() {
-  const remaining = endTime - performance.now();
-  const progress = 1 - remaining / totalMs;
-  render(progress);
-  countdown.textContent = formatTime(remaining);
-
-  if (remaining <= 0) {
-    stopTimer(true);
-    return;
-  }
-
-  timerId = requestAnimationFrame(tick);
 }
 
 function startTimer(minutes, button) {
   stopTimer(false);
 
   totalMs = minutes * 60 * 1000;
-  endTime = performance.now() + totalMs;
+  endTime = Date.now() + totalMs;
 
   buttons.forEach((btn) => btn.classList.remove('active'));
   button.classList.add('active');
 
   selectedLabel.textContent = `${minutes}분`;
   countdown.textContent = formatTime(totalMs);
-  render(0);
+  setProgress(0);
+  sandStream.setAttribute('opacity', '1');
 
-  timerId = requestAnimationFrame(tick);
+  timerId = setInterval(() => {
+    const remaining = endTime - Date.now();
+    const progress = 1 - remaining / totalMs;
+
+    setProgress(progress);
+    countdown.textContent = formatTime(remaining);
+
+    if (remaining <= 0) {
+      stopTimer(true);
+    }
+  }, 100);
 }
 
 buttons.forEach((button) => {
   button.addEventListener('click', () => {
     const minutes = Number(button.dataset.minutes);
-    if (!Number.isFinite(minutes) || minutes <= 0) return;
     startTimer(minutes, button);
   });
 });
 
-render(0);
+setProgress(0);
 countdown.textContent = '00:00';
