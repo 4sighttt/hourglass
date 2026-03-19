@@ -3,10 +3,11 @@ const selectedLabel = document.getElementById('selectedLabel');
 const countdown = document.getElementById('countdown');
 const sandTop = document.getElementById('sandTop');
 const sandBottom = document.getElementById('sandBottom');
+const sandPile = document.getElementById('sandPile');
 const stream = document.getElementById('stream');
 
 let timerId = null;
-let endTime = null;
+let endTime = 0;
 let totalMs = 0;
 
 function formatTime(ms) {
@@ -16,17 +17,31 @@ function formatTime(ms) {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-function setProgress(progress) {
-  const clamped = Math.min(1, Math.max(0, progress));
-  sandTop.style.transform = `translateX(-50%) scaleY(${1 - clamped})`;
-  sandBottom.style.transform = `translateX(-50%) scaleY(${clamped})`;
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
-function stopTimer(finished = false) {
-  if (timerId) {
+function setProgress(progress) {
+  const p = clamp(progress, 0, 1);
+  const topScale = Math.max(0.03, 1 - p);
+  const bottomScale = Math.max(0.03, p);
+  const pileScale = Math.max(0.02, p);
+
+  sandTop.style.transform = `translateX(-50%) scaleY(${topScale})`;
+  sandBottom.style.transform = `translateX(-50%) scaleY(${bottomScale})`;
+  sandPile.style.transform = `translateX(-50%) scale(${pileScale})`;
+  sandPile.style.opacity = `${0.2 + p * 0.8}`;
+}
+
+function clearTimer() {
+  if (timerId !== null) {
     clearInterval(timerId);
     timerId = null;
   }
+}
+
+function stopTimer(finished = false) {
+  clearTimer();
   stream.classList.remove('running');
 
   if (finished) {
@@ -35,31 +50,33 @@ function stopTimer(finished = false) {
   }
 }
 
-function startTimer(minutes, clickedButton) {
-  stopTimer(false);
+function tick() {
+  const remaining = endTime - Date.now();
+  const progress = 1 - remaining / totalMs;
+
+  setProgress(progress);
+  countdown.textContent = formatTime(remaining);
+
+  if (remaining <= 0) {
+    stopTimer(true);
+  }
+}
+
+function startTimer(minutes, button) {
+  clearTimer();
 
   totalMs = minutes * 60 * 1000;
   endTime = Date.now() + totalMs;
 
-  buttons.forEach((button) => button.classList.remove('active'));
-  clickedButton.classList.add('active');
+  buttons.forEach((item) => item.classList.remove('active'));
+  button.classList.add('active');
 
   selectedLabel.textContent = `${minutes}분`;
   countdown.textContent = formatTime(totalMs);
   setProgress(0);
   stream.classList.add('running');
 
-  timerId = setInterval(() => {
-    const remaining = endTime - Date.now();
-    const progress = 1 - remaining / totalMs;
-
-    setProgress(progress);
-    countdown.textContent = formatTime(remaining);
-
-    if (remaining <= 0) {
-      stopTimer(true);
-    }
-  }, 100);
+  timerId = setInterval(tick, 100);
 }
 
 buttons.forEach((button) => {
@@ -69,5 +86,6 @@ buttons.forEach((button) => {
   });
 });
 
+selectedLabel.textContent = '없음';
 countdown.textContent = '00:00';
 setProgress(0);
